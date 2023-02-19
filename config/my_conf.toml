@@ -1,0 +1,15 @@
+train_batch_size = 64
+val_batch_size = 64
+
+[dataset.specific]
+name = "dataset1"
+kfold_N = 5
+kfold_I = 0
+
+[pl_module.optim]
+lr_list = [1e-3, 5e-4, 2e-4, 1e-4, 5e-5]
+lr_milestones = [2, 4, 6, 8, 10]
+
+[pl_module.net.specific]
+name = "net1"
+backbone = "shufflenet"
