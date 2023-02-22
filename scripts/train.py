@@ -8,13 +8,9 @@ from pydantic import BaseModel, StrictInt
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.utils import data
 
+from pl_template.callbacks.my_printing_callback import MyPrintingCallback
+from pl_template.callbacks.scalar_tb_callback import ScalarTensorboardCallback
 from project_name.datasets import DatasetCfg, get_dataset
-from project_name.lightning_modules.callbacks.my_printing_callback import (
-    MyPrintingCallback,
-)
-from project_name.lightning_modules.callbacks.scalar_tb_callback import (
-    ScalarTensorboardCallback,
-)
 from project_name.lightning_modules.classification import (
     PlClassification,
     PlClassificationCfg,

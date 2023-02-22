@@ -5,7 +5,7 @@ import torch
 from pytorch_lightning.callbacks import Callback
 from torchmetrics import MeanMetric
 
-from project_name.utils.utils import AverageMeter, StaticPrinter, setup_for_distributed
+from pl_template.utils.utils import AverageMeter, StaticPrinter, setup_for_distributed
 
 
 class MyPrintingCallback(Callback):
