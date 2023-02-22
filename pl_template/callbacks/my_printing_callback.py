@@ -61,7 +61,7 @@ class MyPrintingCallback(Callback):
         for key, val in losses.items():
             pl_module.loss_metrics[key].update(val)
 
-        pl_module.train_metrics.update(outputs["preds"], outputs["target"])
+        curr_err = pl_module.train_metrics(outputs["preds"], outputs["target"])
 
         if (batch_idx + 1) % 10 == 0:
             self.sp.reset()
@@ -76,9 +76,9 @@ class MyPrintingCallback(Callback):
 
             self.sp.print(f"max mem (MB): {torch.cuda.max_memory_allocated() / 2**20:.0f}")
             for key, val in pl_module.loss_metrics.items():
-                self.sp.print(f"{key}: {val.compute():.6f}")
+                self.sp.print(f"{key}: {losses[key]:.6f} ({val.compute():.6f})")
             for key, val in pl_module.train_metrics.compute().items():
-                self.sp.print(f"{key}: {val.item():.6f}")
+                self.sp.print(f"{key}: {curr_err[key]:.6f} ({val.item():.6f})")
 
         if batch_idx + 1 == trainer.num_training_batches:
             print(
@@ -101,7 +101,7 @@ class MyPrintingCallback(Callback):
             metrics.reset()
             print("")
 
-        metrics.update(outputs["preds"], outputs["target"])
+        curr_err = metrics(outputs["preds"], outputs["target"])
 
         if (batch_idx + 1) % 10 == 0:
             self.sp.reset()
@@ -110,7 +110,7 @@ class MyPrintingCallback(Callback):
             )
             self.sp.print(f"max mem (MB): {torch.cuda.max_memory_allocated() / 2**20:.0f}")
             for key, val in metrics.compute().items():
-                self.sp.print(f"{key}: {val.item():.6f}")
+                self.sp.print(f"{key}: {curr_err[key]:.6f} ({val.item():.6f})")
 
         if batch_idx + 1 == num_batches:
             print(
