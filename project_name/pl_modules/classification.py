@@ -6,6 +6,7 @@ from torch import optim
 from torchmetrics import MetricCollection
 from torchmetrics.classification.accuracy import MulticlassAccuracy
 
+from pl_template.utils.utils import get_epoch_lr
 from project_name.modules import NetCfg, get_module
 
 
@@ -17,19 +18,6 @@ class OptimCfg(BaseModel):
 class PlClassificationCfg(BaseModel):
     optim: OptimCfg
     net: NetCfg
-
-
-def get_epoch_lr(epoch: int, lrs: list[int], milestones: list[int]):
-
-    assert all(x > 0 for x in lrs), lrs
-    assert all(x > 0 for x in milestones), milestones
-    assert milestones == sorted(milestones), milestones
-
-    for lr, ms in zip(lrs, milestones, strict=True):
-        if epoch < ms:
-            return lr
-
-    return lrs[-1]
 
 
 class PlClassification(pl.LightningModule):

@@ -51,3 +51,16 @@ class AverageMeter:
     @property
     def val(self):
         return self.avg
+
+
+def get_epoch_lr(epoch: int, lrs: list[int], milestones: list[int]):
+
+    assert all(x > 0 for x in lrs), lrs
+    assert all(x > 0 for x in milestones), milestones
+    assert milestones == sorted(milestones), milestones
+
+    for lr, ms in zip(lrs, milestones, strict=True):
+        if epoch < ms:
+            return lr
+
+    return lrs[-1]

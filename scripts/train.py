@@ -11,10 +11,7 @@ from torch.utils import data
 from pl_template.callbacks.my_printing_callback import MyPrintingCallback
 from pl_template.callbacks.scalar_tb_callback import ScalarTensorboardCallback
 from project_name.datasets import DatasetCfg, get_dataset
-from project_name.lightning_modules.classification import (
-    PlClassification,
-    PlClassificationCfg,
-)
+from project_name.pl_modules.classification import PlClassification, PlClassificationCfg
 
 
 class TrainCfg(BaseModel):
@@ -57,7 +54,7 @@ def main(config_path: Path):
         max_epochs=cfg.pl_module.optim.lr_milestones[-1],
         benchmark=True,
         callbacks=[
-            ModelCheckpoint(save_weights_only=True, every_n_epochs=1),
+            ModelCheckpoint(save_top_k=-1, save_weights_only=True, every_n_epochs=1),
             MyPrintingCallback(),
             ScalarTensorboardCallback(),
         ],
