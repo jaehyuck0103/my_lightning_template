@@ -15,7 +15,7 @@ class NetCfg(BaseModel):
 
 def get_module(cfg: NetCfg):
     if cfg.specific.name == "net1":
-        dataset = Net1(cfg.specific)
+        net = Net1(cfg.specific)
     else:
         raise ValueError(f"Unexpected Module: name={cfg.specific.name}")
-    return dataset
+    return net

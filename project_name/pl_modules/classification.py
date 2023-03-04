@@ -28,8 +28,8 @@ class PlClassification(pl.LightningModule):
 
         metrics = MetricCollection(
             {
-                "err/acc1": MulticlassAccuracy(num_classes=10),
-                "err/acc2": MulticlassAccuracy(num_classes=10, top_k=2),
+                "err/top1": MulticlassAccuracy(num_classes=10, average="micro"),
+                "err/top5": MulticlassAccuracy(num_classes=10, average="micro", top_k=5),
             }
         )
         self.train_metrics = metrics.clone()
@@ -65,7 +65,7 @@ class PlClassification(pl.LightningModule):
 
         return {"loss": cur_loss, "losses": losses, "preds": y_pred, "target": y_gt}
 
-    def validation_step(self, inputs, batch_idx, dataloader_idx):
+    def validation_step(self, inputs, batch_idx, dataloader_idx=0):
 
         # Forward pass
         y_gt = inputs["label"]  # (B, 1)

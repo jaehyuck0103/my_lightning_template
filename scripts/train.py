@@ -1,8 +1,11 @@
 from datetime import datetime
 from pathlib import Path
 
+import cv2
+import numpy as np
 import pytorch_lightning as pl
 import tomli
+import torch
 import typer
 from pydantic import BaseModel, StrictInt
 from pytorch_lightning.callbacks import ModelCheckpoint
@@ -13,6 +16,11 @@ from pl_template.callbacks.scalar_tb_callback import ScalarTensorboardCallback
 from project_name.datasets import DatasetCfg, get_dataset
 from project_name.pl_modules.classification import PlClassification, PlClassificationCfg
 
+torch.backends.cudnn.benchmark = True
+cv2.setNumThreads(0)
+cv2.ocl.setUseOpenCL(False)
+np.set_printoptions(linewidth=100)
+
 
 class TrainCfg(BaseModel):
     train_batch_size: StrictInt
@@ -21,7 +29,7 @@ class TrainCfg(BaseModel):
     pl_module: PlClassificationCfg
 
 
-def main(config_path: Path):
+def main(config_path: Path, devices: int = 1, precision: int = 32):
 
     cfg = TrainCfg.parse_obj(tomli.loads(config_path.read_text("utf-8")))
     log_dir = Path("Logs") / config_path.stem / datetime.now().strftime("%y%m%d_%H%M%S")
@@ -50,7 +58,7 @@ def main(config_path: Path):
     trainer = pl.Trainer(
         default_root_dir=log_dir,
         accelerator="cuda",
-        devices=1,
+        devices=devices,
         max_epochs=cfg.pl_module.optim.lr_milestones[-1],
         benchmark=True,
         callbacks=[
@@ -60,22 +68,11 @@ def main(config_path: Path):
         ],
         enable_progress_bar=False,
         logger=False,
+        precision=precision,
     )
 
     model = PlClassification(cfg.pl_module)
     trainer.fit(model, train_loader, [val_loader, val_loader])
-
-    """
-    # Load best checkpoint after training
-    model = ViT.load_from_checkpoint(trainer.checkpoint_callback.best_model_path, cfg=cfg)
-
-    # Test best model on validation and test set
-    val_result = trainer.test(model, dataloaders=val_loader, verbose=False)
-    test_result = trainer.test(model, dataloaders=test_loader, verbose=False)
-    result = {"test": test_result[0]["test_acc"], "val": val_result[0]["test_acc"]}
-
-    print("ViT results", result)
-    """
 
 
 if __name__ == "__main__":

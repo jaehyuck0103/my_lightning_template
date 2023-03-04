@@ -1,10 +1,12 @@
+import math
+import random
 from pathlib import Path
 from typing import Literal
 
 import cv2
 import numpy as np
 import pandas as pd
-from pydantic import BaseModel, StrictInt
+from pydantic import BaseModel, StrictFloat, StrictInt
 from sklearn.model_selection import StratifiedKFold
 from torch.utils.data import Dataset
 
@@ -15,6 +17,7 @@ TEST_IMG_DIR = Path("Data") / "test_images"
 
 class Dataset1Cfg(BaseModel):
     name: Literal["dataset1"]
+    epoch_scale_factor: StrictFloat
     kfold_N: StrictInt
     kfold_I: StrictInt
 
@@ -49,9 +52,15 @@ class Dataset1(Dataset):
         else:
             raise ValueError(f"Unknown Mode {mode}")
 
+        #
+        self.epoch_scale_factor = cfg.epoch_scale_factor
+
     def __getitem__(self, _idx):
 
-        idx = self.idx_map[_idx]
+        if self.epoch_scale_factor < 1:
+            _idx += len(self) * random.randrange(math.ceil(1 / self.epoch_scale_factor))
+
+        idx = self.idx_map[_idx % len(self.idx_map)]
 
         basename = self.df["basename"].iloc[idx]
         label = self.df["label"].iloc[idx]
@@ -79,4 +88,4 @@ class Dataset1(Dataset):
         return sample
 
     def __len__(self):
-        return len(self.idx_map)
+        return round(len(self.idx_map) * self.epoch_scale_factor)
