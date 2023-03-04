@@ -17,6 +17,7 @@ TEST_IMG_DIR = Path("Data") / "test_images"
 
 class Dataset1Cfg(BaseModel):
     name: Literal["dataset1"]
+    mode: Literal["train"] | Literal["val"]
     epoch_scale_factor: StrictFloat
     kfold_N: StrictInt
     kfold_I: StrictInt
@@ -31,10 +32,10 @@ def _imread_float(f):
 
 
 class Dataset1(Dataset):
-    def __init__(self, cfg: Dataset1Cfg, mode: str):
+    def __init__(self, cfg: Dataset1Cfg):
         super().__init__()
 
-        self.mode = mode
+        self.mode = cfg.mode
 
         df = pd.read_csv(
             TRAIN_CSV_PATH, names=["basename", "label"], dtype={"basename": str, "label": int}
@@ -45,12 +46,12 @@ class Dataset1(Dataset):
         train_idx, valid_idx = list(kf.split(np.zeros(num_imgs), df["label"]))[cfg.kfold_I]
 
         self.df = df
-        if mode == "train":
+        if cfg.mode == "train":
             self.idx_map = train_idx
-        elif mode == "val":
+        elif cfg.mode == "val":
             self.idx_map = valid_idx
         else:
-            raise ValueError(f"Unknown Mode {mode}")
+            raise ValueError(f"Unknown Mode {cfg.mode}")
 
         #
         self.epoch_scale_factor = cfg.epoch_scale_factor

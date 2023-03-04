@@ -25,7 +25,8 @@ np.set_printoptions(linewidth=100)
 class TrainCfg(BaseModel):
     train_batch_size: StrictInt
     val_batch_size: StrictInt
-    dataset: DatasetCfg
+    train_dataset: DatasetCfg
+    val_datasets: list[DatasetCfg]
     pl_module: PlClassificationCfg
 
 
@@ -35,8 +36,8 @@ def main(config_path: Path, devices: int = 1, precision: int = 32):
     log_dir = Path("Logs") / config_path.stem / datetime.now().strftime("%y%m%d_%H%M%S")
 
     #
-    train_dataset = get_dataset(cfg.dataset, mode="train")
-    val_dataset = get_dataset(cfg.dataset, mode="val")
+    train_dataset = get_dataset(cfg.train_dataset)
+    val_datasets = [get_dataset(x) for x in cfg.val_datasets]
 
     # We define a set of data loaders that we can use for various purposes later.
     train_loader = data.DataLoader(
@@ -47,13 +48,16 @@ def main(config_path: Path, devices: int = 1, precision: int = 32):
         pin_memory=True,
         num_workers=4,
     )
-    val_loader = data.DataLoader(
-        val_dataset,
-        batch_size=cfg.val_batch_size,
-        shuffle=False,
-        drop_last=False,
-        num_workers=4,
-    )
+    val_loaders = [
+        data.DataLoader(
+            x,
+            batch_size=cfg.val_batch_size,
+            shuffle=False,
+            drop_last=False,
+            num_workers=4,
+        )
+        for x in val_datasets
+    ]
 
     trainer = pl.Trainer(
         default_root_dir=log_dir,
@@ -72,7 +76,7 @@ def main(config_path: Path, devices: int = 1, precision: int = 32):
     )
 
     model = PlClassification(cfg.pl_module)
-    trainer.fit(model, train_loader, [val_loader, val_loader])
+    trainer.fit(model, train_loader, val_loaders)
 
 
 if __name__ == "__main__":

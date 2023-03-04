@@ -1,8 +1,17 @@
 train_batch_size = 64
 val_batch_size = 64
 
-[dataset.specific]
+[train_dataset.specific]
 name = "dataset1"
+mode = "train"
+epoch_scale_factor = 1.0
+kfold_N = 5
+kfold_I = 0
+
+[[val_datasets]]
+[val_datasets.specific]
+name = "dataset1"
+mode = "val"
 epoch_scale_factor = 1.0
 kfold_N = 5
 kfold_I = 0

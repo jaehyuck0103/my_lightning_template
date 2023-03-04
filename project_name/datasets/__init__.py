@@ -13,9 +13,9 @@ class DatasetCfg(BaseModel):
     specific: Dataset1Cfg | Dataset2Cfg = Field(..., discriminator="name")
 
 
-def get_dataset(cfg: DatasetCfg, mode: str):
+def get_dataset(cfg: DatasetCfg):
     if cfg.specific.name == "dataset1":
-        dataset = Dataset1(cfg.specific, mode=mode)
+        dataset = Dataset1(cfg.specific)
         print(f"{len(dataset)} items\n")
     else:
         raise ValueError(f"Unexpected Dataset: name={cfg.specific.name}")
