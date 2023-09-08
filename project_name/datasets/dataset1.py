@@ -6,7 +6,7 @@ from typing import Literal
 import cv2
 import numpy as np
 import pandas as pd
-from pydantic import BaseModel, StrictFloat, StrictInt
+from pydantic import BaseModel
 from sklearn.model_selection import StratifiedKFold
 from torch.utils.data import Dataset
 
@@ -18,9 +18,9 @@ TEST_IMG_DIR = Path("Data") / "test_images"
 class Dataset1Cfg(BaseModel):
     name: Literal["dataset1"]
     mode: Literal["train"] | Literal["val"]
-    epoch_scale_factor: StrictFloat
-    kfold_N: StrictInt
-    kfold_I: StrictInt
+    epoch_scale_factor: float
+    kfold_N: int
+    kfold_I: int
 
 
 def _imread_float(f):
@@ -57,7 +57,6 @@ class Dataset1(Dataset):
         self.epoch_scale_factor = cfg.epoch_scale_factor
 
     def __getitem__(self, _idx):
-
         if self.epoch_scale_factor < 1:
             _idx += len(self) * random.randrange(math.ceil(1 / self.epoch_scale_factor))
 

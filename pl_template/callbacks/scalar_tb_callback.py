@@ -33,7 +33,7 @@ class ScalarTensorboardCallback(Callback):
 
     @rank_zero_only
     def on_validation_batch_end(
-        self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx
+        self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx=0
     ):
         if batch_idx + 1 == trainer.num_val_batches[dataloader_idx]:
             for key, val in pl_module.val_metrics.compute().items():

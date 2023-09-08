@@ -1,7 +1,7 @@
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
-from pydantic import BaseModel, StrictFloat, StrictInt
+from pydantic import BaseModel
 from torch import optim
 from torchmetrics import MetricCollection
 from torchmetrics.classification.accuracy import MulticlassAccuracy
@@ -11,8 +11,8 @@ from project_name.modules import NetCfg, get_module
 
 
 class OptimCfg(BaseModel):
-    lr_list: list[StrictFloat]
-    lr_milestones: list[StrictInt]
+    lr_list: list[float]
+    lr_milestones: list[int]
 
 
 class PlClassificationCfg(BaseModel):
@@ -49,7 +49,6 @@ class PlClassification(pl.LightningModule):
         return {"optimizer": optimizer, "lr_scheduler": lr_scheduler}
 
     def training_step(self, inputs, batch_idx):
-
         # Forward pass
         y_pred = self.net(inputs)  # (batch, n_class)
 
@@ -66,7 +65,6 @@ class PlClassification(pl.LightningModule):
         return {"loss": cur_loss, "losses": losses, "preds": y_pred, "target": y_gt}
 
     def validation_step(self, inputs, batch_idx, dataloader_idx=0):
-
         # Forward pass
         y_gt = inputs["label"]  # (B, 1)
         y_pred = self.net(inputs)  # (B, 10)

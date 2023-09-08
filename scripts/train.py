@@ -7,7 +7,7 @@ import pytorch_lightning as pl
 import tomli
 import torch
 import typer
-from pydantic import BaseModel, StrictInt
+from pydantic import BaseModel
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.utils import data
 
@@ -22,18 +22,19 @@ cv2.setNumThreads(0)
 cv2.ocl.setUseOpenCL(False)
 np.set_printoptions(linewidth=100)
 
+app = typer.Typer(pretty_exceptions_enable=False)
+
 
 class TrainCfg(BaseModel):
-    train_batch_size: StrictInt
-    val_batch_size: StrictInt
+    train_batch_size: int
+    val_batch_size: int
     train_dataset: DatasetCfg
     val_datasets: list[DatasetCfg]
     pl_module: PlClassificationCfg
 
 
 def main(config_path: Path, devices: int = 1, precision: int = 32):
-
-    cfg = TrainCfg.parse_obj(tomli.loads(config_path.read_text("utf-8")))
+    cfg = TrainCfg.model_validate(tomli.loads(config_path.read_text("utf-8")), strict=True)
     log_dir = Path("Logs") / config_path.stem / datetime.now().strftime("%y%m%d_%H%M%S")
 
     #
@@ -81,4 +82,6 @@ def main(config_path: Path, devices: int = 1, precision: int = 32):
 
 
 if __name__ == "__main__":
-    typer.run(main)
+    # typer.run(main)
+    app.command()(main)
+    app()

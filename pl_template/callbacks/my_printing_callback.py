@@ -48,7 +48,6 @@ class MyPrintingCallback(Callback):
         self.data_time.update(time.time() - self.batch_end)
 
     def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
-
         self.iter_time.update(time.time() - self.batch_end)
         self.batch_end = time.time()
         losses = outputs["losses"]
@@ -90,9 +89,8 @@ class MyPrintingCallback(Callback):
             # pl_module.log_dict(pl_module.train_metrics.compute())
 
     def on_validation_batch_end(
-        self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx
+        self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx=0
     ):
-
         metrics = pl_module.val_metrics
         num_batches = trainer.num_val_batches[dataloader_idx]
 
